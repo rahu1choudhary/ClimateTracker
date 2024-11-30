@@ -2,51 +2,66 @@ document.addEventListener('DOMContentLoaded', () => {
     const weatherStatus = document.getElementById('weather-status');
     const temperature = document.getElementById('temperature');
     const humidity = document.getElementById('humidity');
+    const weatherIcon = document.getElementById('weather-icon');
+    const cityInput = document.getElementById('city-input');
+    const fetchWeatherButton = document.getElementById('fetch-weather');
     const refreshButton = document.getElementById('refresh-weather');
     const historyContainer = document.getElementById('history-container');
 
-    // Fetch weather data
-    function fetchWeatherData() {
-        setTimeout(() => {
-            const weather = {
-                status: ['Sunny', 'Rainy', 'Windy'][Math.floor(Math.random() * 3)], // Random status
-                temp: Math.floor(Math.random() * 10 + 20), // Random temperature for demo
-                humid: Math.floor(Math.random() * 20 + 50) // Random humidity for demo
-            };
-    
-            // Update DOM
-            weatherStatus.textContent = `Weather: ${weather.status}`;
-            temperature.textContent = `Temperature: ${weather.temp}°C`;
-            humidity.textContent = `Humidity: ${weather.humid}%`;
-    
-            // Add icon or alert based on weather conditions
-            const weatherIcon = document.getElementById('weather-icon');
-            weatherIcon.innerHTML = ''; // Clear previous icon or alert
-    
-            if (weather.status === 'Sunny') {
+    // Function to fetch weather data from the server
+    async function fetchWeatherData(city) {
+        try {
+            const response = await fetch(`http://localhost:5000/weather/${city}`);
+            if (!response.ok) {
+                throw new Error(`Failed to fetch weather data: ${response.statusText}`);
+            }
+            const data = await response.json();
+            
+            // Update the DOM with fetched data
+            weatherStatus.textContent = `Weather: ${data.cloud ? data.cloud : 'Clear'}`;
+            temperature.textContent = `Temperature: ${data.temperature_c}°C`;
+            humidity.textContent = `Humidity: ${data.humidity}%`;
+
+            // Update the icon based on the weather status
+            weatherIcon.innerHTML = '';
+            if (data.cloud === 'Clear') {
                 weatherIcon.innerHTML = '<span class="sunny">☀️</span>';
-            } else if (weather.status === 'Rainy') {
+            } else if (data.cloud.includes('Rain')) {
                 weatherIcon.innerHTML = '<span class="rainy">🌧️</span>';
-            } else if (weather.status === 'Windy') {
+            } else {
                 weatherIcon.innerHTML = '<span class="windy">💨</span>';
             }
-    
-            if (weather.temp > 30) {
-                weatherIcon.innerHTML += `<div class="alert">🔥 High temperature alert!</div>`;
-            } else if (weather.humid > 70) {
-                weatherIcon.innerHTML += `<div class="alert">💦 High humidity alert!</div>`;
-            }
-    
-            // Add to history
+
+            // Add history
             const now = new Date().toLocaleTimeString();
-            const historyEntry = `At ${now} - ${weather.status}, ${weather.temp}°C, ${weather.humid}%`;
+            const historyEntry = `At ${now} - ${data.cloud}, ${data.temperature_c}°C, ${data.humidity}%`;
             const historyItem = document.createElement('p');
             historyItem.textContent = historyEntry;
             historyContainer.prepend(historyItem);
-        }, 1000);
-    }
-    
 
-    // Initial data load
-    fetchWeatherData();
+        } catch (error) {
+            console.error('Error fetching weather data:', error);
+            weatherStatus.textContent = 'Error fetching data';
+        }
+    }
+
+    // Event listener for the "Get Weather" button
+    fetchWeatherButton.addEventListener('click', () => {
+        const city = cityInput.value.trim();
+        if (city) {
+            fetchWeatherData(city);
+        } else {
+            alert('Please enter a city name');
+        }
+    });
+
+    // Event listener for the "Refresh" button
+    refreshButton.addEventListener('click', () => {
+        const city = cityInput.value.trim();
+        if (city) {
+            fetchWeatherData(city);
+        } else {
+            alert('Please enter a city name to refresh the weather');
+        }
+    });
 });
