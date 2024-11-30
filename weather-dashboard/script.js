@@ -16,7 +16,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 throw new Error(`Failed to fetch weather data: ${response.statusText}`);
             }
             const data = await response.json();
-            
+
             // Update the DOM with fetched data
             weatherStatus.textContent = `Weather: ${data.cloud ? data.cloud : 'Clear'}`;
             temperature.textContent = `Temperature: ${data.temperature_c}°C`;
@@ -45,10 +45,38 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    // Function to send the city name to the backend server (to trigger Kestra workflow)
+    async function triggerKestraWorkflow(city) {
+        try {
+            const response = await fetch('http://localhost:5000/trigger-kestra-workflow', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ city })
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                console.log('Workflow triggered successfully:', data);
+                alert('Weather data is being fetched...');
+            } else {
+                console.error('Failed to trigger workflow:', response.statusText);
+                alert('Failed to trigger workflow. Please try again.');
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            alert('An error occurred. Please check your connection.');
+        }
+    }
+
     // Event listener for the "Get Weather" button
     fetchWeatherButton.addEventListener('click', () => {
         const city = cityInput.value.trim();
         if (city) {
+            // Trigger the Kestra workflow
+            triggerKestraWorkflow(city);
+            // Fetch and display the weather data
             fetchWeatherData(city);
         } else {
             alert('Please enter a city name');
@@ -59,6 +87,7 @@ document.addEventListener('DOMContentLoaded', () => {
     refreshButton.addEventListener('click', () => {
         const city = cityInput.value.trim();
         if (city) {
+            // Refresh weather data
             fetchWeatherData(city);
         } else {
             alert('Please enter a city name to refresh the weather');
