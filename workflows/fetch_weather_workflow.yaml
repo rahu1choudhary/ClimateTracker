@@ -1,0 +1,20 @@
+id: fetch-weather-workflow
+namespace: weather
+
+inputs:
+  - name: city
+    type: STRING
+    required: true
+    description: Name of the city to fetch weather data for.
+
+tasks:
+  - id: weather-fetch-task
+    type: io.kestra.plugin.scripts.python.Commands
+    beforeCommands:
+      - pip install requests redis
+    namespaceFiles:
+      enabled: true
+      include:
+        - fetch_weather.py
+    commands:
+      - python fetch_weather.py "{{ inputs.city }}"
