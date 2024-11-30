@@ -1,0 +1,22 @@
+id: fetch-weather-data
+namespace: weather
+inputs:
+  - name: city
+    type: STRING
+    required: true
+tasks:
+  - id: run-python-script
+    type: io.kestra.core.tasks.scripts.Python
+    properties:
+      script: |
+        import os
+        from fetch_weather import fetch_weather, store_in_redis
+        
+        city = "{{inputs.city}}"
+        weather_data = fetch_weather(city)
+        
+        if weather_data:
+            store_in_redis(weather_data)
+            print("Weather data fetched and stored successfully!")
+        else:
+            print("Failed to fetch weather data.")

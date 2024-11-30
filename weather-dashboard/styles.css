@@ -1,0 +1,106 @@
+/* General styles */
+body {
+    font-family: 'Arial', sans-serif;
+    margin: 0;
+    padding: 0;
+    line-height: 1.6;
+    background: linear-gradient(to bottom, #87CEFA, #f4f4f4);
+    color: #333;
+}
+
+header {
+    background: #333;
+    color: #fff;
+    padding: 15px 20px;
+    text-align: center;
+    font-size: 1.5em;
+}
+
+main {
+    padding: 20px;
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+section {
+    margin-bottom: 20px;
+}
+
+#current-weather, #history {
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    padding: 20px;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+#current-weather:hover, #history:hover {
+    transform: scale(1.02);
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3);
+}
+
+#weather-status {
+    color: #555;
+    font-size: 1.2em;
+}
+
+#temperature, #humidity {
+    font-size: 1.3em;
+    font-weight: bold;
+    margin: 10px 0;
+}
+
+button {
+    display: block;
+    margin: 15px 0 0;
+    padding: 10px 15px;
+    background-color: #007BFF;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1em;
+    transition: background-color 0.3s ease;
+}
+
+button:hover {
+    background-color: #0056b3;
+}
+#weather-icon {
+    margin: 10px 0;
+    text-align: center;
+    font-size: 2em; /* Adjust icon size */
+}
+
+.sunny {
+    color: #FFD700; /* Gold for sunny */
+}
+
+.rainy {
+    color: #1E90FF; /* DodgerBlue for rainy */
+}
+
+.windy {
+    color: #A9A9A9; /* DarkGray for windy */
+}
+
+.alert {
+    background: #FF6347; /* Tomato color for alerts */
+    color: #fff;
+    padding: 5px 10px;
+    border-radius: 5px;
+    display: inline-block;
+    margin-top: 10px;
+}
+
+/* Weather history */
+#history-container {
+    max-height: 150px;
+    overflow-y: auto;
+    padding: 10px;
+    border: 1px solid #ddd;
+    background: #f9f9f9;
+    border-radius: 5px;
+    font-size: 0.9em;
+    color: #555;
+}
