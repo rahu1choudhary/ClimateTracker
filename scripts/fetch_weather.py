@@ -1,3 +1,4 @@
+import sys
 import requests
 import json
 import redis
@@ -16,7 +17,7 @@ def connect_to_redis(url="redis://:mypassword@host.docker.internal:6379/0"):
         print(f"Redis authentication failed: {e}")
         return None
 
-# Function to fetch weather data and store in Redis
+# Function to fetch weather data and store it in Redis
 def fetch_and_store_weather(api_key, city, redis_client):
     try:
         # Construct API URL
@@ -24,16 +25,25 @@ def fetch_and_store_weather(api_key, city, redis_client):
 
         # Make the API request
         response = requests.get(api_url)
-        print("HTTP Status Code:", response.status_code)
-
         if response.status_code == 200:
-            weather_data = response.json()  # Parse JSON response
-            print("Weather Data:", json.dumps(weather_data, indent=4))  # Print formatted JSON
+            weather_data = response.json()
+            print("Weather Data:", json.dumps(weather_data, indent=4))
 
-            # Store weather data in Redis
+            # Filter required fields
+            current_weather = weather_data.get("current", {})
+            filtered_data = {
+                "temperature_c": current_weather.get("temp_c"),
+                "temperature_f": current_weather.get("temp_f"),
+                "humidity": current_weather.get("humidity"),
+                "wind_speed_kph": current_weather.get("wind_kph"),
+                "cloud": current_weather.get("cloud"),
+            }
+
+            # Store all attributes under a single hash key in Redis
             redis_key = f"weather:{city}"
-            redis_client.set(redis_key, json.dumps(weather_data))  # Save as a JSON string
-            print(f"Weather data for {city} stored in Redis with key '{redis_key}'")
+            redis_client.hset(redis_key, mapping=filtered_data)
+            print(f"Weather data for {city} stored in Redis under key: {redis_key}")
+
         else:
             print(f"Failed to fetch weather data. Status Code: {response.status_code}")
             print("Error Message:", response.text)
@@ -45,16 +55,14 @@ def fetch_and_store_weather(api_key, city, redis_client):
 
 # Main execution
 if __name__ == "__main__":
-    # Replace with your actual API key
-    API_KEY = "5112a95172c9498d9e294254243011"
-    city = "Delhi"
+    if len(sys.argv) != 2:
+        print("Usage: python fetch_weather.py <city_name>")
+        sys.exit(1)
 
-    # Redis URL (Update with your actual URL)
+    city = sys.argv[1]
+    API_KEY = "5112a95172c9498d9e294254243011"
     REDIS_URL = "redis://:mypassword@host.docker.internal:6379/0"
 
-    # Connect to Redis
     redis_client = connect_to_redis(REDIS_URL)
-
     if redis_client:
-        # Fetch and store weather data
         fetch_and_store_weather(API_KEY, city, redis_client)
