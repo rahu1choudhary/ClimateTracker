@@ -1,8 +1,8 @@
-id: fetch-weather-workflow
-namespace: weather
+id: fetch-weather-flow
+namespace: weather.team
 
 inputs:
-  - name: city
+  - id: city
     type: STRING
     required: true
     description: Name of the city to fetch weather data for.
@@ -18,3 +18,11 @@ tasks:
         - fetch_weather.py
     commands:
       - python fetch_weather.py "{{ inputs.city }}"
+
+  - id: trigger-api-call
+    type: io.kestra.plugin.core.http.Request
+    uri: http://localhost:8080/api/v1/executions/weather.team/fetch-weather
+    method: POST
+    contentType: multipart/form-data
+    formData:
+      city: "{{ inputs.city }}"
